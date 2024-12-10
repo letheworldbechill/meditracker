@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medikament einstellen</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #d4edda, #ffffff);
+            color: #155724;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            color: #155724;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background-color: #138496;
+        }
+
+        .back-button {
+            background-color: #ffc107;
+        }
+
+        .back-button:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+<body>
+    <h1>Medikament einstellen</h1>
+    <form class="form-container" onsubmit="saveMedication(event)">
+        <label for="name">Name des Medikaments:</label>
+        <input type="text" id="name" required>
+
+        <label for="tablets">Anzahl der Tabletten:</label>
+        <input type="number" id="tablets" required>
+
+        <label for="dose">Tägliche verschriebene Dosis:</label>
+        <input type="number" id="dose" step="0.1" required>
+
+        <div class="button-container">
+            <button type="button" class="back-button" onclick="goBack()">Zurück</button>
+            <button type="submit">Speichern</button>
+        </div>
+    </form>
+
+    <script>
+        // Lade bestehende Medikamente oder initialisiere ein leeres Array
+        let medications = JSON.parse(localStorage.getItem("medications")) || [];
+
+        // Funktion zum Speichern eines neuen Medikaments
+        function saveMedication(event) {
+            event.preventDefault();
+
+            // Hole die Eingabewerte
+            const name = document.getElementById("name").value;
+            const tablets = parseInt(document.getElementById("tablets").value);
+            const dose = parseFloat(document.getElementById("dose").value);
+
+            if (tablets <= 0 || dose <= 0) {
+                alert("Bitte geben Sie eine gültige Anzahl und Dosis ein!");
+                return;
+            }
+
+            // Berechne das ursprüngliche Datum
+            const today = new Date();
+            const baseDate = today.toISOString(); // Startdatum (heutiges Datum)
+            const totalDays = Math.floor(tablets / dose); // Tage, die die Tabletten reichen
+            const originalEndDate = new Date(today);
+            originalEndDate.setDate(today.getDate() + totalDays); // Ursprüngliches Enddatum
+
+            // Erstelle ein Medikament-Objekt
+            const medication = {
+                name,
+                totalTablets: tablets,
+                dailyDose: dose,
+                remainingDosesToday: dose,
+                baseDate: baseDate,
+                originalEndDate: originalEndDate.toISOString(),
+                overUnderDoses: 0, // Anfangs kein Überschuss/Defizit
+                lastReset: today.toISOString(), // Tagesreset
+            };
+
+            // Füge das Medikament zur Liste hinzu und speichere es
+            medications.push(medication);
+            localStorage.setItem("medications", JSON.stringify(medications));
+
+            // Zurück zur Startseite
+            window.location.href = "index.html";
+        }
+
+        // Funktion zum Zurückkehren zur Startseite
+        function goBack() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
